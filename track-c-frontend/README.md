@@ -32,6 +32,8 @@ npm run typecheck
 ./kata next c       # 현재 spec 테스트 통과 시 다음 spec 으로
 ```
 
+**시작 전: 아키텍처 결정** — [프론트엔드 아키텍처 가이드](../docs/guides/frontend-architecture.md)를 읽고 `specs/001-account-dashboard/plan.md`의 "0. 아키텍처 결정"을 채운 뒤 `/sdd c001`로 검토받는다.
+
 **백엔드 없이 시작하기** — 트랙 B가 아직이라면 plan 단계에서 목(mock) 전략을 먼저 정한다. (MSW 등은 필요할 때 직접 설치하고 plan에 근거를 남긴다)
 
 ## 시작 코드

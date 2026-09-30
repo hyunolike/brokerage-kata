@@ -34,7 +34,7 @@
 | `track-c-frontend/` | React 과제. `specs/`, `src/`, `tests/` |
 | `contracts/brokerage-api.yaml` | 트랙 B ↔ C API 계약 |
 | `templates/` | spec / plan / tasks / ADR 템플릿 |
-| `docs/guides/` | 아키텍처 선택지, 디자인 패턴 카탈로그, 클린코드 체크리스트(`/review` 채점 기준), Kotlin 풀이 |
+| `docs/guides/` | 아키텍처 선택지(백엔드·프론트엔드), 디자인 패턴 카탈로그, 클린코드 체크리스트(`/review` 채점 기준), Kotlin 풀이 |
 | `docs/tech-radar.md` | 채용공고 기반 실무 기술 조사 (`/tech-radar`로 갱신) |
 
 ## 명령

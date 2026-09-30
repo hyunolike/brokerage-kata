@@ -27,6 +27,7 @@ B의 확장 spec(007~009)과 Kotlin 풀이는 증권·핀테크 채용공고에�
 | 가이드 | 내용 |
 |---|---|
 | [아키텍처](docs/guides/architecture.md) | 계층형 / 풍부한 도메인 / 헥사고날, 패키지 구조, ArchUnit으로 강제하기 |
+| [프론트엔드 아키텍처](docs/guides/frontend-architecture.md) | 상태 분류, 서버 상태 관리, 폴더 구조, API 계층, 컴포넌트 구성 |
 | [디자인 패턴](docs/guides/design-patterns.md) | "이런 신호가 보이면 이 패턴을 검토" 카탈로그 (문제별 정답 매핑은 일부러 없음) |
 | [클린코드](docs/guides/clean-code.md) | ID가 붙은 체크리스트. `/review`가 이 ID로 지적한다 |
 | [Kotlin으로 풀기](docs/guides/kotlin.md) | 트랙 A 2회차를 Kotlin으로 |

@@ -23,7 +23,8 @@
 
 ## 작성 가이드 (작성 후 이 섹션은 지운다)
 
-- 선택지와 판단 기준: [/docs/guides/architecture.md](../../../docs/guides/architecture.md)
+- 선택지와 판단 기준: [/docs/guides/architecture.md](../../../docs/guides/architecture.md), [디자인 패턴 카탈로그](../../../docs/guides/design-patterns.md)
+- 셀프 체크: 작성 후 `/sdd 001` 로 검토를 받는다 (ADR ↔ ArchUnit 규칙 ↔ plan 일치 여부)
 - 반드시 답할 것
   1. 구조(계층형 / 풍부한 도메인 / 헥사고날 / 혼합)와 패키지 방식
   2. 도메인 규칙은 어디에 두는가, JPA 엔티티와 도메인 모델을 분리하는가
