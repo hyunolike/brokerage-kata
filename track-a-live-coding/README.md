@@ -16,6 +16,15 @@
 - 시작 코드의 시그니처는 바꿔도 된다. (실제 면접이라면 먼저 물어보자)
 - 테스트 골격의 시나리오는 최소 목록이다. 더 추가하는 것이 좋다.
 
+## Kotlin 으로 풀기
+
+빌드가 Kotlin 도 함께 컴파일한다. `src/main/kotlin`에 같은 패키지로 풀면 된다. 자세한 방법: [docs/guides/kotlin.md](../docs/guides/kotlin.md)
+
+## 설계 참고
+
+풀기 전에 읽지 않아도 된다. 회고 때 자신의 선택과 비교해 보자.
+[아키텍처](../docs/guides/architecture.md) · [디자인 패턴](../docs/guides/design-patterns.md) · [클린코드 체크리스트](../docs/guides/clean-code.md)
+
 ```bash
 ./kata start p1
 ./gradlew :track-a-live-coding:p1-order-intake:test

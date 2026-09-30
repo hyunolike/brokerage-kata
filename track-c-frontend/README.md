@@ -15,6 +15,7 @@ API 계약(`/contracts/brokerage-api.yaml`)을 사이에 두고 트랙 B와 **�
 | 3 | [`003-order-list`](specs/003-order-list/spec.md) | 주문 내역, 취소 | 002 |
 | 4 | [`004-error-handling`](specs/004-error-handling/spec.md) | 공통 에러 처리 | 004 |
 | 5 | [`005-integration`](specs/005-integration/spec.md) | 백엔드 연동, 계약 동기화 | 006 |
+| 6 | [`006-realtime`](specs/006-realtime/spec.md) | (선택) 실시간 주문 상태, 재연결, 중복 메시지 | 008 |
 
 ## 진행 방법 (SDD)
 

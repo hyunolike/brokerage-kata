@@ -11,7 +11,7 @@ AI가 옆에 있으면 가장 쉬운 길은 "정답 받아 적기"다. 이 레�
 ├─────────────────────────────────────────────────────────────┤
 │ 2. 절차      .claude/skills/    /kata-start /interviewer /hint     │  ← 표준화
 │                                 /review /solution /next-stage      │
-│                                 /retro /sdd                        │
+│                                 /retro /sdd /tech-radar            │
 ├─────────────────────────────────────────────────────────────┤
 │ 3. 강제      .claude/hooks/     guard-solution: src/tests 쓰기 차단 │  ← 강제
 │                                 guard-stages: 미도달 단계 읽기 차단 │
@@ -60,5 +60,7 @@ AI가 옆에 있으면 가장 쉬운 길은 "정답 받아 적기"다. 이 레�
 | `.claude/settings.json` | 훅 연결, 자주 쓰는 명령 허용 |
 | `.claude/hooks/guard-solution.sh` | `track-*/src/**`, `track-c-frontend/tests/**` 쓰기 차단 |
 | `.claude/hooks/guard-stages.sh` | 트랙 A에서 현재 단계보다 뒤의 `stage-N.md`, `Stage{N}Test.java` 읽기 차단 |
-| `.claude/skills/*/SKILL.md` | 슬래시 명령 8개 |
+| `.claude/skills/*/SKILL.md` | 슬래시 명령 9개 |
+| `docs/guides/clean-code.md` | `/review`가 지적 근거로 인용하는 체크리스트 (ID 체계) |
+| `track-b-assignment/.../Stage1ArchitectureTest` | ADR-0000 의 아키텍처 결정을 ArchUnit 으로 강제 |
 | `kata` | 타이머·단계 게이트·기록 CLI (bash 3.2 호환, macOS 기본 bash에서도 동작) |

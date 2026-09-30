@@ -18,6 +18,7 @@ argument-hint: "<spec 번호, 예: 002 | c002> [spec|plan|tasks|trace]"
 3. **plan → tasks**: 작업이 30분 이하인가? 테스트 작업이 구현보다 앞서는가? 빠진 AC가 없는가?
 4. **AC ↔ 테스트 추적성**: 모든 `AC-*`가 테스트 이름에 있는가? (Grep으로 확인해 표로 보여준다)
 5. **constitution 위반**: 금액 타입, 공통 응답 포맷, 범위 밖 기능 추가, ADR 누락 등
+6. **아키텍처 추적성** (트랙 B): ADR-0000 의 "ArchUnit 으로 강제할 규칙"이 `Stage1ArchitectureTest`에 모두 있는가, plan의 패키지/레이어 설계가 ADR-0000 과 일치하는가
 
 ## 출력
 ```

@@ -13,11 +13,23 @@
 
 | 트랙 | 형태 | 기술 | 문제 |
 |---|---|---|---|
-| [A. 라이브 코딩](track-a-live-coding) | 40~60분, 단계별 요구사항 공개 | Java 21 (프레임워크 없음) | [p1 주문 접수](track-a-live-coding/p1-order-intake) · [p2 호가창 체결](track-a-live-coding/p2-order-book) · [p3 잔고·손익](track-a-live-coding/p3-portfolio-pnl) · [p4 예수금 동시성](track-a-live-coding/p4-concurrent-cash) · [p5 레거시 리팩터링](track-a-live-coding/p5-refactor-legacy) |
-| [B. 과제](track-b-assignment) | 3~4시간, SDD | Spring Boot 3, JPA, H2/MySQL, Redis, Docker Compose | 모의 주식 주문 API 서버 |
+| [A. 라이브 코딩](track-a-live-coding) | 40~60분, 단계별 요구사항 공개 | Java 21 또는 Kotlin (프레임워크 없음) | [p1 주문 접수](track-a-live-coding/p1-order-intake) · [p2 호가창 체결](track-a-live-coding/p2-order-book) · [p3 잔고·손익](track-a-live-coding/p3-portfolio-pnl) · [p4 예수금 동시성](track-a-live-coding/p4-concurrent-cash) · [p5 레거시 리팩터링](track-a-live-coding/p5-refactor-legacy) |
+| [B. 과제](track-b-assignment) | 3~4시간 + 확장, SDD | Spring Boot 3, JPA, H2/MySQL, Redis, Docker Compose, ArchUnit · 확장: Kafka, WebSocket/SSE, Prometheus/Grafana | 모의 주식 주문 API 서버 |
 | [C. 프론트엔드](track-c-frontend) | 3~4시간, SDD | React, TypeScript, Vite, Vitest | B의 API를 쓰는 주문 웹 |
 
 B와 C는 [`contracts/brokerage-api.yaml`](contracts) 계약으로 연결됩니다.
+B의 확장 spec(007~009)과 Kotlin 풀이는 증권·핀테크 채용공고에서 자주 보이는 기술을 조사해 추가했습니다 → [기술 레이더](docs/tech-radar.md)
+
+## 설계 기준
+
+정답 구조를 정해 두지 않고, **선택지와 판단 기준**을 두고 스스로 고릅니다. 고른 이유는 ADR로 남기고, 규칙은 테스트로 강제합니다.
+
+| 가이드 | 내용 |
+|---|---|
+| [아키텍처](docs/guides/architecture.md) | 계층형 / 풍부한 도메인 / 헥사고날, 패키지 구조, ArchUnit으로 강제하기 |
+| [디자인 패턴](docs/guides/design-patterns.md) | "이런 신호가 보이면 이 패턴을 검토" 카탈로그 (문제별 정답 매핑은 일부러 없음) |
+| [클린코드](docs/guides/clean-code.md) | ID가 붙은 체크리스트. `/review`가 이 ID로 지적한다 |
+| [Kotlin으로 풀기](docs/guides/kotlin.md) | 트랙 A 2회차를 Kotlin으로 |
 
 ## 빠른 시작
 
@@ -57,7 +69,8 @@ B와 C는 [`contracts/brokerage-api.yaml`](contracts) 계약으로 연결됩니�
 | `/solution` | 모범답안 (내가 직접 호출할 때만, 대화창에만 출력) |
 | `/next-stage p1` | 테스트 확인 후 다음 단계로 |
 | `/retro p1` | 측정값을 채운 회고 초안 생성 |
-| `/sdd 002` | 트랙 B·C의 spec ↔ plan ↔ tasks ↔ 테스트 정합성 검토 |
+| `/sdd 002` | 트랙 B·C의 spec ↔ plan ↔ tasks ↔ 테스트 ↔ ADR 정합성 검토 |
+| `/tech-radar` | 채용공고를 다시 조사해 기술 레이더 갱신, 연습 공백 제안 |
 
 강제 장치: `src/`·`tests/`에 Claude가 코드를 쓰려 하면 훅이 막고, 아직 도달하지 않은 단계 문서를 읽으려 해도 막습니다.
 
@@ -103,11 +116,15 @@ code       구현
 | track-b-assignment | 4 | - | - |
 | track-b-assignment | 5 | - | - |
 | track-b-assignment | 6 | - | - |
+| track-b-assignment | 7 | - | - |
+| track-b-assignment | 8 | - | - |
+| track-b-assignment | 9 | - | - |
 | track-c-frontend | 1 | - | - |
 | track-c-frontend | 2 | - | - |
 | track-c-frontend | 3 | - | - |
 | track-c-frontend | 4 | - | - |
 | track-c-frontend | 5 | - | - |
+| track-c-frontend | 6 | - | - |
 <!-- progress:end -->
 
 ## 레포 구조
@@ -120,13 +137,14 @@ brokerage-kata/
 ├── kata                    타이머·단계 진행 CLI
 ├── .claude/                하네스: skills(슬래시 명령), hooks
 ├── .kata/                  진행 상태, 소요 시간 기록
-├── docs/                   harness.md, sdd.md
+├── docs/                   harness.md, sdd.md, tech-radar.md
+│   └── guides/             architecture, design-patterns, clean-code, kotlin
 ├── templates/              spec / plan / tasks / ADR 템플릿
 ├── contracts/              트랙 B ↔ C API 계약 (OpenAPI)
-├── track-a-live-coding/    p1 ~ p5 (Gradle 서브프로젝트)
+├── track-a-live-coding/    p1 ~ p5 (Gradle 서브프로젝트, Java/Kotlin)
 │   └── pN-*/  README.md, NOTES.md, stages/, src/main, src/test
 ├── track-b-assignment/     Spring Boot (Gradle 서브프로젝트)
-│   └── specs/, docs/adr/, docker-compose.yml, src/
+│   └── specs/(001~009), docs/adr/, docker-compose.yml, src/
 └── track-c-frontend/       React + Vite (npm)
-    └── specs/, src/, tests/
+    └── specs/(001~006), src/, tests/
 ```

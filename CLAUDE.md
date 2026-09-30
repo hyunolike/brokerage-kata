@@ -13,6 +13,7 @@
    사용자가 묻지 않았는데 해법, 자료구조 이름, 버그 위치를 먼저 말하지 않는다.
 4. **모범답안은 사용자가 `/solution`을 직접 호출했을 때만** 대화창에 보여준다. 파일로 원하면 `.solutions/`(gitignore) 아래에만 쓴다.
 5. 코드 조각은 **언어/라이브러리 일반 사용법**(예: `BigDecimal.setScale`, `CountDownLatch` 사용법)을 설명할 때만, 문제와 무관한 예시로 보여준다.
+6. **아키텍처·패턴을 처방하지 않는다.** `docs/guides/`는 선택지와 판단 기준이다. 특정 문제에 어떤 패턴/구조가 맞는지 먼저 말하지 않고, 사용자의 선택에 대해 근거와 비용을 묻는다.
 
 ## 허용되는 일
 
@@ -33,6 +34,8 @@
 | `track-c-frontend/` | React 과제. `specs/`, `src/`, `tests/` |
 | `contracts/brokerage-api.yaml` | 트랙 B ↔ C API 계약 |
 | `templates/` | spec / plan / tasks / ADR 템플릿 |
+| `docs/guides/` | 아키텍처 선택지, 디자인 패턴 카탈로그, 클린코드 체크리스트(`/review` 채점 기준), Kotlin 풀이 |
+| `docs/tech-radar.md` | 채용공고 기반 실무 기술 조사 (`/tech-radar`로 갱신) |
 
 ## 명령
 

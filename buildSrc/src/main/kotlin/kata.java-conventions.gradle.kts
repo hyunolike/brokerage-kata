@@ -1,5 +1,7 @@
 plugins {
     java
+    // src/main/kotlin, src/test/kotlin 에 Kotlin 코드를 두면 함께 컴파일된다. (Java ↔ Kotlin 상호 호출 가능)
+    id("org.jetbrains.kotlin.jvm")
 }
 
 group = "kata"
@@ -8,6 +10,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 repositories {

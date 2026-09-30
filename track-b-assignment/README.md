@@ -15,8 +15,18 @@
 | 4 | [`004-error-response`](specs/004-error-response/spec.md) | 예외 처리와 공통 응답 포맷 | 30분 |
 | 5 | [`005-integration-test`](specs/005-integration-test/spec.md) | 통합 테스트 | 30분 |
 | 6 | [`006-docker`](specs/006-docker/spec.md) | `docker compose up` 한 번으로 실행 | 20분 |
+| 7 | [`007-event-kafka`](specs/007-event-kafka/spec.md) | 확장: 주문 이벤트 발행·소비, 아웃박스, 멱등 소비자, DLT | 90분 |
+| 8 | [`008-realtime-push`](specs/008-realtime-push/spec.md) | 확장(선택): 주문 상태 실시간 푸시 (WebSocket/SSE) | 60분 |
+| 9 | [`009-observability`](specs/009-observability/spec.md) | 확장(선택): 헬스, 비즈니스 지표, 추적 ID, Grafana | 60분 |
 
 과제 테스트는 요구사항 전체가 처음부터 주어지므로 **모든 spec을 먼저 읽어도 된다.** (트랙 A와 다름)
+001~006이 기본 과제(3~4시간)이고, 007~009는 실무 채용공고에서 자주 보이는 기술([tech-radar](../docs/tech-radar.md))을 연습하는 확장이다.
+
+## 시작 전: 아키텍처 결정 (15분)
+
+1. [아키텍처 가이드](../docs/guides/architecture.md)를 읽고 [`docs/adr/0000-architecture.md`](docs/adr/0000-architecture.md)를 작성한다.
+2. 결정한 규칙을 `acceptance/Stage1ArchitectureTest`(ArchUnit)에 옮긴다. 이 테스트도 stage 1 잠금에 포함된다.
+3. 제출 전 [클린코드 체크리스트](../docs/guides/clean-code.md)의 🔴 항목으로 셀프 리뷰한다.
 
 ## 진행 방법 (SDD)
 
@@ -76,10 +86,13 @@ erDiagram
 
 | 결정 | 선택 | 대안 | 근거 (ADR) |
 |---|---|---|---|
+| 아키텍처 | | 계층형 / 풍부한 도메인 / 헥사고날 | [ADR-0000](docs/adr/0000-architecture.md) |
 | 동시성 제어 | | Redis 분산락 / 비관적 락 / 낙관적 락 / 조건부 UPDATE | [ADR-0001](docs/adr/) |
 | 멱등성 | | | |
 | 공통 응답 포맷 | | | |
 | 테스트 격리 | | | |
+| (007) 이벤트 발행 | | 아웃박스 / 트랜잭션 이벤트 리스너 / Kafka 트랜잭션 | [ADR-0002](docs/adr/) |
+| (008) 실시간 전송 | | WebSocket / SSE | [ADR-0003](docs/adr/) |
 
 ## 못 한 것 / 다음에 할 것
 
