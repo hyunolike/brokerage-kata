@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+# kata — 타이머, 단계 진행, 진행 현황 기록을 담당하는 작은 CLI (bash 3.2 호환)
+#
+#   ./kata list                 문제 목록
+#   ./kata start <문제>         타이머 시작 (이미 진행 중이면 현재 단계 안내)
+#   ./kata time  <문제>         현재 단계 경과 시간
+#   ./kata next  <문제>         현재 단계 잠금 해제·테스트 통과 확인 → 기록 → 다음 단계
+#   ./kata status [--brief]     진행 중인 문제 요약
+#   ./kata reset <문제>         진행 상태 초기화 (다시 풀기)
+#
+# <문제>: p1 ~ p5, b, c (또는 폴더 이름)
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+STATE_DIR="$ROOT/.kata/state"
+HISTORY="$ROOT/.kata/history.tsv"
+README="$ROOT/README.md"
+LOCK="🔒"
+
+die() { echo "kata: $*" >&2; exit 1; }
+
+ALL_KEYS="p1 p2 p3 p4 p5 b c"
+
+# 문제 키 → 폴더
+dir_of() {
+  case "$1" in
+    p1|p1-order-intake) echo "track-a-live-coding/p1-order-intake" ;;
+    p2|p2-order-book) echo "track-a-live-coding/p2-order-book" ;;
+    p3|p3-portfolio-pnl) echo "track-a-live-coding/p3-portfolio-pnl" ;;
+    p4|p4-concurrent-cash) echo "track-a-live-coding/p4-concurrent-cash" ;;
+    p5|p5-refactor-legacy) echo "track-a-live-coding/p5-refactor-legacy" ;;
+    b|track-b|track-b-assignment) echo "track-b-assignment" ;;
+    c|track-c|track-c-frontend) echo "track-c-frontend" ;;
+    *) return 1 ;;
+  esac
+}
+
+name_of() { basename "$(dir_of "$1")"; }
+
+# 단계 문서 목록 (트랙 A: stages/stage-N.md, 트랙 B/C: specs/NNN-*/spec.md)
+stage_docs() {
+  local d="$ROOT/$1"
+  if [ -d "$d/stages" ]; then
+    ls "$d"/stages/stage-*.md 2>/dev/null | sort -t- -k2 -n
+  else
+    ls -d "$d"/specs/[0-9][0-9][0-9]-*/ 2>/dev/null | sort | sed 's|/$|/spec.md|'
+  fi
+}
+
+stage_count() { stage_docs "$1" | wc -l | tr -d ' '; }
+
+stage_doc() { stage_docs "$1" | sed -n "${2}p" | sed "s|^$ROOT/||"; }
+
+test_dir() {
+  if [ -d "$ROOT/$1/src/test" ]; then echo "$ROOT/$1/src/test"; else echo "$ROOT/$1/tests"; fi
+}
+
+run_tests() {
+  case "$1" in
+    track-a-live-coding/*) (cd "$ROOT" && ./gradlew -q ":track-a-live-coding:$(basename "$1"):test") ;;
+    track-b-assignment) (cd "$ROOT" && ./gradlew -q ":track-b-assignment:test") ;;
+    track-c-frontend) (cd "$ROOT/track-c-frontend" && npm test --silent) ;;
+  esac
+}
+
+# 아직 잠겨 있는 N단계 테스트 파일
+locked_files() {
+  grep -rlE "(@Disabled|\.skip).*${LOCK} stage-$2([^0-9]|$)" "$(test_dir "$1")" 2>/dev/null | sed "s|^$ROOT/||" || true
+}
+
+state_file() { echo "$STATE_DIR/$(name_of "$1")"; }
+
+get() { # get <key> <field>
+  local f; f="$(state_file "$1")"
+  [ -f "$f" ] && grep -E "^$2=" "$f" | head -1 | cut -d= -f2- || true
+}
+
+put() { # put <key> <field> <value>
+  local f tmp; f="$(state_file "$1")"; tmp="$f.tmp"
+  mkdir -p "$STATE_DIR"; touch "$f"
+  grep -vE "^$2=" "$f" > "$tmp" || true
+  echo "$2=$3" >> "$tmp"
+  mv "$tmp" "$f"
+}
+
+now() { date +%s; }
+minutes_since() { echo $(( ( $(now) - $1 + 59 ) / 60 )); }
+
+# README 진행 현황 표 갱신: 비어 있는 (문제, 단계) 행을 채우고, 없으면 표 끝에 추가
+record_readme() { # name stage minutes date
+  [ -f "$README" ] || return 0
+  local tmp="$README.tmp"
+  awk -v n="$1" -v s="$2" -v m="$3분" -v d="$4" '
+    BEGIN { done = 0 }
+    !done && $0 ~ "^\\| " n " \\| " s " \\| - \\| - \\|" { print "| " n " | " s " | " m " | " d " |"; done = 1; next }
+    !done && /<!-- progress:end -->/ { print "| " n " | " s " | " m " | " d " |"; done = 1 }
+    { print }
+  ' "$README" > "$tmp" && mv "$tmp" "$README"
+}
+
+cmd_list() {
+  for k in $ALL_KEYS; do printf "  %-3s %-40s %s단계\n" "$k" "$(dir_of "$k")" "$(stage_count "$(dir_of "$k")")"; done
+}
+
+print_stage() { # key stage
+  local d; d="$(dir_of "$1")"
+  echo "  📄 요구사항: $(stage_doc "$d" "$2")"
+  local files; files="$(locked_files "$d" "$2")"
+  if [ -n "$files" ]; then
+    echo "  🔒 잠금 해제할 테스트:"; echo "$files" | sed 's/^/     - /'
+  fi
+}
+
+cmd_start() {
+  local k="$1" d; d="$(dir_of "$k")" || die "알 수 없는 문제: $k"
+  if [ "$(get "$k" status)" = "in_progress" ]; then
+    local s; s="$(get "$k" stage)"
+    echo "⏱  $(name_of "$k") 진행 중 — stage $s / $(stage_count "$d"), 경과 $(minutes_since "$(get "$k" stage_started)")분"
+    print_stage "$k" "$s"; return
+  fi
+  [ "$(get "$k" status)" = "done" ] && die "$(name_of "$k")는 이미 완료했다. 다시 풀려면: ./kata reset $k"
+  put "$k" status in_progress
+  put "$k" stage 1
+  put "$k" started "$(now)"
+  put "$k" stage_started "$(now)"
+  echo "⏱  타이머 시작: $(name_of "$k") — stage 1 / $(stage_count "$d")"
+  print_stage "$k" 1
+  echo
+  echo "  순서: 요구사항 읽기 → NOTES.md(또는 plan.md)에 질문 목록 → 테스트 잠금 해제 → 구현 → ./kata next $k"
+}
+
+cmd_time() {
+  local k="$1"; dir_of "$k" >/dev/null || die "알 수 없는 문제: $k"
+  [ "$(get "$k" status)" = "in_progress" ] || die "진행 중이 아니다: ./kata start $k"
+  echo "stage $(get "$k" stage): $(minutes_since "$(get "$k" stage_started)")분 / 전체: $(minutes_since "$(get "$k" started)")분"
+}
+
+cmd_next() {
+  local k="$1" d; d="$(dir_of "$k")" || die "알 수 없는 문제: $k"
+  [ "$(get "$k" status)" = "in_progress" ] || die "진행 중이 아니다: ./kata start $k"
+  local s total files; s="$(get "$k" stage)"; total="$(stage_count "$d")"
+  files="$(locked_files "$d" "$s")"
+  if [ -n "$files" ]; then
+    echo "🔒 stage $s 테스트가 아직 잠겨 있다. 잠금을 풀고 테스트를 채운 뒤 다시 실행하라:" >&2
+    echo "$files" | sed 's/^/   - /' >&2
+    exit 1
+  fi
+  echo "🧪 테스트 실행 중..."
+  if ! run_tests "$d"; then
+    echo "❌ 테스트 실패 — stage $s 를 마저 끝내자." >&2; exit 1
+  fi
+  local m today; m="$(minutes_since "$(get "$k" stage_started)")"; today="$(date +%Y-%m-%d)"
+  mkdir -p "$(dirname "$HISTORY")"
+  [ -f "$HISTORY" ] || printf "problem\tstage\tminutes\tdate\n" > "$HISTORY"
+  printf "%s\t%s\t%s\t%s\n" "$(name_of "$k")" "$s" "$m" "$today" >> "$HISTORY"
+  record_readme "$(name_of "$k")" "$s" "$m" "$today"
+  echo "✅ stage $s 완료 — ${m}분 (README 진행 현황에 기록)"
+  if [ "$s" -ge "$total" ]; then
+    put "$k" status done
+    echo "🎉 $(name_of "$k") 전체 완료 — 총 $(minutes_since "$(get "$k" started)")분. 회고: /retro $k (또는 RETRO_TEMPLATE.md 복사)"
+  else
+    s=$((s + 1))
+    put "$k" stage "$s"
+    put "$k" stage_started "$(now)"
+    echo "➡️  stage $s / $total 시작"
+    print_stage "$k" "$s"
+  fi
+}
+
+cmd_status() {
+  local brief="${1:-}" any=0
+  for k in $ALL_KEYS; do
+    local st; st="$(get "$k" status)"
+    [ -z "$st" ] && continue
+    any=1
+    if [ "$st" = "in_progress" ]; then
+      local s d; s="$(get "$k" stage)"; d="$(dir_of "$k")"
+      echo "- $(name_of "$k"): stage $s / $(stage_count "$d") 진행 중 ($(minutes_since "$(get "$k" stage_started)")분 경과) — 현재 요구사항: $(stage_doc "$d" "$s")"
+    elif [ "$brief" != "--brief" ]; then
+      echo "- $(name_of "$k"): 완료"
+    fi
+  done
+  if [ "$brief" = "--brief" ]; then
+    [ "$any" = 1 ] && echo "[kata] 위 단계보다 뒤의 stage 문서와 테스트는 사용자가 아직 보지 않았다. 내용을 언급하지 말 것." || echo "[kata] 진행 중인 문제 없음. 시작: ./kata start p1"
+  elif [ "$any" = 0 ]; then
+    echo "진행 중인 문제 없음. 시작: ./kata start p1"
+  fi
+}
+
+cmd_reset() {
+  local k="$1"; dir_of "$k" >/dev/null || die "알 수 없는 문제: $k"
+  rm -f "$(state_file "$k")"
+  echo "↺ $(name_of "$k") 상태 초기화 (기록한 history 와 README 표는 유지)"
+  echo "  코드도 처음 상태로 되돌리려면: git restore --source=<시작 커밋> -- $(dir_of "$k")/src"
+}
+
+usage() { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; }
+
+case "${1:-}" in
+  list) cmd_list ;;
+  start) [ $# -ge 2 ] || die "사용법: ./kata start <문제>"; cmd_start "$2" ;;
+  time) [ $# -ge 2 ] || die "사용법: ./kata time <문제>"; cmd_time "$2" ;;
+  next) [ $# -ge 2 ] || die "사용법: ./kata next <문제>"; cmd_next "$2" ;;
+  status) cmd_status "${2:-}" ;;
+  reset) [ $# -ge 2 ] || die "사용법: ./kata reset <문제>"; cmd_reset "$2" ;;
+  *) usage ;;
+esac

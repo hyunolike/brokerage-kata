@@ -1,0 +1,12 @@
+openapi: 3.1.0
+info:
+  title: Brokerage Kata API
+  version: 0.0.1
+  description: |
+    모의 주식 주문 API 계약.
+    트랙 B spec 의 plan 단계에서 엔드포인트와 스키마를 직접 추가한다.
+servers:
+  - url: http://localhost:8080
+paths: {}
+components:
+  schemas: {}

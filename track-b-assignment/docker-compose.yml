@@ -1,0 +1,42 @@
+# 실행: track-b-assignment 디렉터리에서 `docker compose up`
+# 인프라(MySQL, Redis)는 준비되어 있다. app 서비스는 specs/006-docker 에서 직접 완성한다.
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: brokerage
+      MYSQL_USER: brokerage
+      MYSQL_PASSWORD: brokerage
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.4
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # TODO(006): 애플리케이션 서비스
+  # app:
+  #   build: ...            # Dockerfile 작성 (멀티 모듈 빌드이므로 build context 에 주의)
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: docker
+  #     DB_HOST: mysql
+  #     REDIS_HOST: redis
+  #   depends_on: ...       # healthcheck 조건을 활용
+  #   ports:
+  #     - "8080:8080"
+
+  # (선택) 트랙 C 프론트엔드: track-c-frontend/specs/005-integration 참고
+  # web:

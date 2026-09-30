@@ -1,0 +1,30 @@
+# Gradle / Java
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+out/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Node
+node_modules/
+dist/
+coverage/
+*.local
+
+# 모범답안을 파일로 받고 싶을 때만 사용 (커밋하지 않음)
+.solutions/
+
+# 개인 Claude 설정
+.claude/settings.local.json
+
+# Docker
+track-b-assignment/.data/
+
+# 하네스 가드 해제 플래그 (레포 관리 작업 중에만 잠시)
+.kata/SCAFFOLD_MODE

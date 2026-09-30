@@ -1,0 +1,36 @@
+# 기본 프로필: 외부 의존성 없이 H2 인메모리로 실행 (로컬 개발, 테스트)
+spring:
+  application:
+    name: brokerage
+  datasource:
+    url: jdbc:h2:mem:brokerage;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+
+---
+# docker 프로필: docker compose 로 띄운 MySQL + Redis 사용 (specs/006-docker)
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/brokerage?serverTimezone=Asia/Seoul
+    username: ${DB_USER:brokerage}
+    password: ${DB_PASSWORD:brokerage}
+  jpa:
+    hibernate:
+      ddl-auto: validate # TODO(006): 스키마 관리 방식(schema.sql / Flyway / update)을 정하고 ADR 에 기록
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
